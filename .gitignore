@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+/frontend/node_modules/
+/backend/venv/
+__pycache__/
+
+# Environment Variables
+.env
+backend/.env
+
+# Build artifacts
+/frontend/build/
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+*.swo
+*.swp
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log* 
