@@ -1,0 +1,353 @@
+{
+	"info": {
+		"_postman_id": "job-board-api-collection",
+		"name": "Job Board API",
+		"description": "Complete API collection for the Job Board application",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\",\n    \"username\": \"testuser\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "admin@jobboard.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "admin123",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/token",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "token"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Jobs",
+			"item": [
+				{
+					"name": "Get All Jobs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/jobs/",
+							"host": ["{{base_url}}"],
+							"path": ["jobs", ""]
+						}
+					}
+				},
+				{
+					"name": "Get Jobs with Filters",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/jobs/?location=New York&min_salary=50000&max_salary=100000&status=active",
+							"host": ["{{base_url}}"],
+							"path": ["jobs", ""],
+							"query": [
+								{
+									"key": "location",
+									"value": "New York"
+								},
+								{
+									"key": "min_salary",
+									"value": "50000"
+								},
+								{
+									"key": "max_salary",
+									"value": "100000"
+								},
+								{
+									"key": "status",
+									"value": "active"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Job by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/jobs/1",
+							"host": ["{{base_url}}"],
+							"path": ["jobs", "1"]
+						}
+					}
+				},
+				{
+					"name": "Create Job (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Senior Python Developer\",\n    \"description\": \"We are looking for an experienced Python developer to join our team.\",\n    \"location\": \"New York, NY\",\n    \"salary\": 120000,\n    \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/jobs/",
+							"host": ["{{base_url}}"],
+							"path": ["jobs", ""]
+						}
+					}
+				},
+				{
+					"name": "Update Job (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"salary\": 130000,\n    \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/jobs/1",
+							"host": ["{{base_url}}"],
+							"path": ["jobs", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Job (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/jobs/1",
+							"host": ["{{base_url}}"],
+							"path": ["jobs", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Applications",
+			"item": [
+				{
+					"name": "Get My Applications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/applications/",
+							"host": ["{{base_url}}"],
+							"path": ["applications", ""]
+						}
+					}
+				},
+				{
+					"name": "Get All Applications (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/applications/",
+							"host": ["{{base_url}}"],
+							"path": ["applications", ""]
+						}
+					}
+				},
+				{
+					"name": "Get Applications by Job (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/applications/job/1",
+							"host": ["{{base_url}}"],
+							"path": ["applications", "job", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Application by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/applications/1",
+							"host": ["{{base_url}}"],
+							"path": ["applications", "1"]
+						}
+					}
+				},
+				{
+					"name": "Apply for Job",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "job_id",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "John Doe",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "john@example.com",
+									"type": "text"
+								},
+								{
+									"key": "cover_letter",
+									"value": "I am excited to apply for this position...",
+									"type": "text"
+								},
+								{
+									"key": "resume",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/applications/",
+							"host": ["{{base_url}}"],
+							"path": ["applications", ""]
+						}
+					}
+				},
+				{
+					"name": "Update Application Status (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"reviewed\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/applications/1",
+							"host": ["{{base_url}}"],
+							"path": ["applications", "1"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000"
+		},
+		{
+			"key": "admin_token",
+			"value": "your-admin-jwt-token-here"
+		},
+		{
+			"key": "user_token",
+			"value": "your-user-jwt-token-here"
+		}
+	]
+} 

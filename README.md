@@ -1,267 +1,436 @@
-# Job Board Application
+# 🚀 Job Board Application
 
-This is a full-stack job board application built with a React frontend and a FastAPI backend. The entire application is containerized using Docker and managed with Docker Compose for easy setup and deployment.
+A comprehensive job board application with admin and user interfaces, built with **FastAPI** backend and featuring JWT authentication, role-based access control, and file upload capabilities.
 
-## Key Features
+## 📋 Table of Contents
 
-- **Clean, Modern Frontend**: A responsive and user-friendly interface built with React.
-- **Robust Backend API**: A powerful and fast backend powered by FastAPI.
-- **Database**: MongoDB for flexible and scalable data storage.
-- **Containerized**: Fully containerized with Docker for consistent development and production environments.
-- **Authentication**: Secure JWT-based authentication for both regular users and administrators.
-- **Complete Job Cycle**: Functionality for creating companies, posting jobs (admin), browsing jobs, and applying for jobs (user).
-- **Comprehensive Testing**: Includes an end-to-end API testing script to ensure reliability.
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Quick Start](#-quick-start)
+- [Docker Deployment](#-docker-deployment)
+- [API Documentation](#-api-documentation)
+- [Authentication](#-authentication)
+- [Role-Based Access Control](#-role-based-access-control)
+- [API Endpoints](#-api-endpoints)
+- [Database Schema](#-database-schema)
+- [Testing](#-testing)
+- [Deployment](#-deployment)
+- [Contributing](#-contributing)
 
-## Project Structure
+## ✨ Features
 
-The project is organized into a clean and maintainable structure:
+### 🔐 Admin Panel
+- **JWT-based authentication** with secure token management
+- **Complete job management**: Create, edit, delete jobs
+- **Application oversight**: View all applicants with resume URLs
+- **Status management**: Update application statuses (pending → reviewed → accepted/rejected)
+- **Dashboard analytics**: Monitor job postings and applications
+
+### 👥 User Interface
+- **Job browsing**: View available jobs with advanced search and filtering
+- **Application system**: Submit job applications with resume upload
+- **Application tracking**: View submitted applications and their status
+- **User registration**: Easy sign-up process
+
+### 🎯 Bonus Features
+- **Advanced search**: Filter jobs by location, salary range, and status
+- **Application limits**: One application per user per job (prevents spam)
+- **File validation**: Secure resume upload with type checking
+- **API documentation**: Auto-generated Swagger UI and ReDoc
+- **Postman collection**: Ready-to-use API testing collection
+- **Docker support**: Complete containerization with PostgreSQL and Redis
+
+## 🛠 Tech Stack
+
+### Backend
+- **FastAPI** - Modern, fast web framework for building APIs
+- **SQLAlchemy** - SQL toolkit and ORM
+- **PostgreSQL** - Production database (SQLite for development)
+- **Pydantic** - Data validation using Python type annotations
+- **JWT** - JSON Web Tokens for authentication
+- **bcrypt** - Password hashing and verification
+- **aiofiles** - Asynchronous file operations
+- **Redis** - Caching and session management
+
+### Security
+- **JWT Authentication** - Secure token-based authentication
+- **Role-Based Access Control** - Admin vs User permissions
+- **Password Hashing** - bcrypt for secure password storage
+- **File Type Validation** - Secure file upload handling
+- **CORS Support** - Cross-origin resource sharing
+
+### DevOps
+- **Docker** - Containerization
+- **Docker Compose** - Multi-container orchestration
+- **PostgreSQL** - Production database
+- **Redis** - Caching layer
+
+## 📁 Project Structure
 
 ```
-/
-├── backend/            # Contains the FastAPI backend source code
-├── frontend/           # Contains the React frontend source code
-├── .dockerignore       # Specifies files to ignore in Docker builds
-├── .env.example        # Example environment variables (create a .env from this)
-├── API_DOCUMENTATION.md # Detailed documentation of all API endpoints
-├── docker-compose.yml  # Defines and configures the multi-container application
-├── Dockerfile          # Multi-stage Dockerfile for building the application
-├── nginx.conf          # Nginx configuration for serving the app and proxying the API
-├── README.md           # This file
-├── req.txt             # Python dependencies for the backend
-└── start.sh            # Script to start Nginx and the backend server
+job-board-app/
+├── backend/
+│   ├── main.py                          # FastAPI application entry point
+│   ├── config.py                        # Configuration settings
+│   ├── database.py                      # Database connection and session management
+│   ├── models.py                        # SQLAlchemy database models
+│   ├── schemas.py                       # Pydantic request/response models
+│   ├── auth.py                          # JWT authentication utilities
+│   ├── crud.py                          # Database CRUD operations
+│   ├── init_db.py                       # Database initialization script
+│   ├── init_docker_db.py                # Docker database initialization
+│   ├── requirements.txt                 # Python dependencies
+│   ├── Dockerfile                       # Backend container definition
+│   ├── .dockerignore                    # Docker ignore file
+│   ├── README.md                        # Backend-specific documentation
+│   ├── Job_Board_API.postman_collection.json  # Postman collection
+│   └── routers/
+│       ├── __init__.py
+│       ├── auth.py                      # Authentication endpoints
+│       ├── jobs.py                      # Job management endpoints
+│       └── applications.py              # Application endpoints
+├── docker-compose.yml                   # Production Docker Compose
+├── docker-compose.dev.yml               # Development Docker Compose
+├── docker-setup.sh                      # Docker setup script
+├── DOCKER.md                            # Docker documentation
+└── README.md                            # This file
 ```
 
-## Application Workflow
-
-The application provides two main user roles: **Admin** and **User (Job Seeker)**.
-
-1.  **Admin Role**:
-    - An admin can log in to a dedicated dashboard.
-    - From the dashboard, the admin can **post new job openings** and **view all applications** submitted by users for any job.
-
-2.  **User Role (Job Seeker)**:
-    - A user can register and log in to the main application.
-    - Users can browse the list of available jobs.
-    - Users can view detailed information for a specific job.
-    - Users can **submit an application** for a job, which includes uploading a resume.
-    - Users can view a list of all the applications they have submitted.
-
-## Getting Started
-
-Follow these instructions to get the application up and running on your local machine.
+## 🚀 Quick Start
 
 ### Prerequisites
+- Python 3.8+
+- pip (Python package installer)
 
-- [Docker](https://www.docker.com/get-started)
-- [Docker Compose](https://docs.docker.com/compose/install/) (usually included with Docker Desktop)
+### Installation
 
-### Installation & Running the Application
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd job-board-app
+   ```
 
-1.  **Clone the Repository:**
-    ```bash
-    git clone <your-repository-url>
-    cd job_board_app
-    ```
-
-2.  **Create an Environment File:**
-    This project uses environment variables for configuration. The necessary variables are already set within the `docker-compose.yml` file for development. For production, you would create a `.env` file in the `backend` directory.
-
-3.  **Build and Run with Docker Compose:**
-    From the root of the project, run the following command. This will build the Docker image and start the application and database containers.
-    ```bash
-    sudo docker-compose up --build -d
-    ```
-    *Note: `sudo` may be required depending on your Docker installation.*
-
-4.  **Access the Application:**
-    Once the containers are running, you can access the application in your web browser:
-    - **Frontend:** [http://localhost:8080](http://localhost:8080)
-    - **Backend API Docs:** [http://localhost:8080/docs](http://localhost:8080/docs)
-
-5.  **Stopping the Application:**
-    To stop the application and remove the containers, run:
-    ```bash
-    sudo docker-compose down
-    ```
-
-## Testing the API
-
-The project includes a comprehensive test script that verifies all API endpoints. To run the tests:
-
-1.  **Ensure the application is running** (using `docker-compose up`).
-2.  **Run the test script** from the project root:
-    ```bash
-    cd backend && python3 test_api.py
-    ```
-
-## Troubleshooting
-
-If you encounter issues while running the application, try the following steps.
-
-### Port Conflicts
-If you see an error like `port is already allocated`, it means another service is using port `8080` or `27018`. You can either stop the other service or change the port mappings in the `docker-compose.yml` file. For example, change `8080:80` to `8081:80`.
-
-### Corrupted Docker State (`KeyError: 'ContainerConfig'`)
-Sometimes, Docker's state can become corrupted, leading to strange errors. To perform a full cleanup, run the following command. **Warning**: This will delete all Docker containers, volumes (including your database data), and networks associated with the project.
-
-```bash
-sudo docker-compose down --volumes --remove-orphans
-```
-
-After running this command, you can try building and starting the application again with `sudo docker-compose up --build -d`.
-
-### Viewing Logs
-To inspect the logs for a running service and diagnose issues:
-```bash
-sudo docker-compose logs app
-sudo docker-compose logs mongo
-```
-
-## How It Works: Docker Configuration
-
--   **Multi-Stage `Dockerfile`**: The project uses a single, efficient multi-stage `Dockerfile`.
-    1.  The `builder` stage builds the production-ready React frontend.
-    2.  The final stage uses a lightweight Nginx image, copies the built frontend, installs the Python backend, and sets up the environment.
--   **`docker-compose.yml`**:
-    -   Defines two services: `app` (our application) and `mongo` (the database).
-    -   Manages networking between the services.
-    -   Sets environment variables for the application.
--   **`nginx.conf`**:
-    -   Serves the static React application files.
-    -   Acts as a reverse proxy, forwarding all requests to `/api` to the FastAPI backend running on port 8000.
--   **`start.sh`**: A simple shell script that starts both the Nginx server and the Uvicorn server for the FastAPI backend within the final container.
-
-This setup creates a single, unified container for the entire application, making it easy to manage and deploy.
-
-## Features
-
-- **Frontend**: React application with Material-UI
-- **Backend**: FastAPI with MongoDB
-- **Authentication**: JWT-based authentication for users and admins
-- **Job Management**: Create, view, and apply for jobs
-- **Application Tracking**: Track job applications
-- **Admin Panel**: Manage jobs and applications
-
-## Quick Start with Docker
-
-### Prerequisites
-
-- Docker
-- Docker Compose
-
-### Running the Application
-
-1. **Clone the repository and navigate to the backend directory:**
+2. **Navigate to backend directory**
    ```bash
    cd backend
    ```
 
-2. **Build and start the application:**
+3. **Create and activate virtual environment**
    ```bash
-   docker-compose up --build
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
-3. **Access the application:**
-   - Frontend: http://localhost
-   - Backend API: http://localhost/api
-   - API Documentation: http://localhost/docs
+4. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+5. **Initialize the database**
+   ```bash
+   python init_db.py
+   ```
+
+6. **Start the server**
+   ```bash
+   uvicorn main:app --reload
+   ```
+
+The API will be available at `http://localhost:8000`
+
+## 🐳 Docker Deployment
+
+### Prerequisites
+- Docker Engine 20.10+
+- Docker Compose 2.0+
+
+### Quick Docker Setup
+
+1. **Start production environment**
+   ```bash
+   ./docker-setup.sh start
+   ```
+
+2. **Start development environment**
+   ```bash
+   ./docker-setup.sh dev
+   ```
+
+3. **View logs**
+   ```bash
+   ./docker-setup.sh logs
+   ```
+
+4. **Stop services**
+   ```bash
+   ./docker-setup.sh stop
+   ```
+
+### Manual Docker Commands
+
+**Production:**
+```bash
+docker-compose up -d
+```
+
+**Development:**
+```bash
+docker-compose -f docker-compose.dev.yml up -d
+```
+
+**View logs:**
+```bash
+docker-compose logs -f backend
+```
+
+### Docker Services
+
+| Service | Port | Description |
+|---------|------|-------------|
+| Backend API | 8000 | FastAPI application |
+| PostgreSQL | 5432 | Database |
+| Redis | 6379 | Caching |
+
+### Access Points
+- **API**: http://localhost:8000
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+For detailed Docker documentation, see [DOCKER.md](DOCKER.md)
+
+## 📚 API Documentation
+
+### Interactive Documentation
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+### Postman Collection
+Import the provided `Job_Board_API.postman_collection.json` file into Postman for easy API testing.
+
+## 🔐 Authentication
+
+### Default Admin Credentials
+- **Email**: `admin@jobboard.com`
+- **Password**: `admin123`
+
+### Authentication Flow
+1. **Register** a new user account
+2. **Login** to get JWT access token
+3. **Include token** in Authorization header for protected endpoints
+
+### Example Authentication
+```bash
+# Login
+curl -X POST "http://localhost:8000/auth/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "username=admin@jobboard.com&password=admin123"
+
+# Use token in requests
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  http://localhost:8000/jobs/
+```
+
+## 👥 Role-Based Access Control
+
+### Admin Users
+- ✅ Full access to all features
+- ✅ Create, edit, delete jobs
+- ✅ View all applications
+- ✅ Update application statuses
+- ✅ Manage user data
+
+### Regular Users
+- ✅ View and search jobs
+- ✅ Apply for jobs with resume upload
+- ✅ View own applications
+- ❌ Cannot manage jobs or other users' data
+
+## 🔗 API Endpoints
+
+### Authentication
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| POST | `/auth/register` | Register new user | Public |
+| POST | `/auth/token` | Login and get JWT token | Public |
+
+### Jobs
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| GET | `/jobs/` | Get all jobs with filtering | Public |
+| GET | `/jobs/{job_id}` | Get specific job | Public |
+| POST | `/jobs/` | Create new job | Admin only |
+| PUT | `/jobs/{job_id}` | Update job | Admin only |
+| DELETE | `/jobs/{job_id}` | Delete job | Admin only |
+
+### Applications
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| GET | `/applications/` | Get user's applications | User/Admin |
+| GET | `/applications/{id}` | Get specific application | Owner/Admin |
+| POST | `/applications/` | Apply for job | Authenticated users |
+| PUT | `/applications/{id}` | Update status | Admin only |
+| GET | `/applications/job/{job_id}` | Get all applications for job | Admin only |
+
+### Query Parameters for Job Search
+- `location` - Filter by location (partial match)
+- `min_salary` - Minimum salary filter
+- `max_salary` - Maximum salary filter
+- `status` - Filter by job status (active, inactive, filled)
+- `skip` - Pagination offset
+- `limit` - Number of records to return
+
+## 🗄 Database Schema
+
+### Users Table
+```sql
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    email VARCHAR UNIQUE NOT NULL,
+    username VARCHAR UNIQUE NOT NULL,
+    hashed_password VARCHAR NOT NULL,
+    is_admin BOOLEAN DEFAULT FALSE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### Jobs Table
+```sql
+CREATE TABLE jobs (
+    id INTEGER PRIMARY KEY,
+    title VARCHAR NOT NULL,
+    description TEXT NOT NULL,
+    location VARCHAR NOT NULL,
+    salary FLOAT NOT NULL,
+    status VARCHAR DEFAULT 'active',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME
+);
+```
+
+### Applications Table
+```sql
+CREATE TABLE applications (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    job_id INTEGER REFERENCES jobs(id),
+    name VARCHAR NOT NULL,
+    email VARCHAR NOT NULL,
+    resume_url VARCHAR NOT NULL,
+    cover_letter TEXT,
+    status VARCHAR DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+## 🧪 Testing
+
+### Manual Testing
+1. **Health Check**
+   ```bash
+   curl http://localhost:8000/health
+   ```
+
+2. **Create Admin User**
+   ```bash
+   curl -X POST "http://localhost:8000/auth/token" \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     -d "username=admin@jobboard.com&password=admin123"
+   ```
+
+3. **Create Job (Admin)**
+   ```bash
+   curl -X POST "http://localhost:8000/jobs/" \
+     -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{"title": "Test Job", "description": "Test", "location": "Test", "salary": 50000}'
+   ```
+
+4. **Get Jobs**
+   ```bash
+   curl http://localhost:8000/jobs/
+   ```
+
+### Automated Testing
+The API includes comprehensive error handling and validation. Test edge cases:
+- Invalid authentication tokens
+- Missing required fields
+- Duplicate applications
+- File upload validation
+
+## 🚀 Deployment
 
 ### Environment Variables
-
-The application uses the following environment variables (configured in docker-compose.yml):
-
-- `MONGO_URL`: MongoDB connection string
-- `SECRET_KEY`: JWT secret key
-- `ALGORITHM`: JWT algorithm (default: HS256)
-- `ACCESS_TOKEN_EXPIRE_MINUTES`: Token expiration time
-- `DEBUG`: Debug mode
-- `ALLOWED_ORIGINS`: CORS allowed origins
-
-## Development
-
-### Running Locally
-
-1. **Backend:**
-   ```bash
-   cd backend
-   source venv/bin/activate
-   pip install -r req.txt
-   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-   ```
-
-2. **Frontend:**
-   ```bash
-   cd frontend
-   npm install
-   npm start
-   ```
-
-### API Endpoints
-
-- `GET /` - Health check
-- `GET /health` - Health check
-- `POST /admin/register` - Admin registration
-- `POST /admin/login` - Admin login
-- `POST /admin/jobs` - Create job (admin only)
-- `GET /jobs` - Get all jobs
-- `POST /jobs/{job_id}/apply` - Apply for job
-- `GET /admin/applications` - Get applications (admin only)
-- `POST /auth/register` - User registration
-- `POST /auth/login` - User login
-- `GET /user/profile` - Get user profile
-- `PUT /user/profile` - Update user profile
-
-## Docker Architecture
-
-The application uses a multi-stage Docker build:
-
-1. **Frontend Builder**: Builds the React application
-2. **Backend Builder**: Installs Python dependencies
-3. **Final Stage**: Combines frontend build and backend, served by nginx
-
-### Services
-
-- **app**: Main application (frontend + backend)
-- **mongo**: MongoDB database
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Port conflicts**: Make sure ports 80 and 27017 are available
-2. **Build failures**: Check that all files are in the correct locations
-3. **Database connection**: Ensure MongoDB is running and accessible
-
-### Logs
-
-View logs for specific services:
-```bash
-docker-compose logs app
-docker-compose logs mongo
+Create a `.env` file in the backend directory:
+```env
+SECRET_KEY=your-secret-key-here-change-in-production
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+DATABASE_URL=sqlite:///./job_board.db
+UPLOAD_DIR=uploads
 ```
 
-### Reset Database
+### Production Considerations
+1. **Database**: Switch to PostgreSQL or MySQL for production
+2. **File Storage**: Use cloud storage (AWS S3, Google Cloud Storage) for resumes
+3. **Security**: Change default admin credentials
+4. **HTTPS**: Enable SSL/TLS encryption
+5. **Rate Limiting**: Implement API rate limiting
+6. **Monitoring**: Add logging and monitoring
 
-To reset the database:
-```bash
-docker-compose down -v
-docker-compose up --build
+### Docker Deployment
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY . .
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
-## Production Deployment
-
-For production deployment:
-
-1. Update environment variables in docker-compose.yml
-2. Use a proper MongoDB instance
-3. Configure SSL/TLS
-4. Set up proper logging and monitoring
-5. Use a reverse proxy (nginx is already included)
-
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request 
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Development Guidelines
+- Follow PEP 8 style guidelines
+- Add type hints to all functions
+- Include docstrings for all endpoints
+- Write tests for new features
+- Update documentation
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+If you encounter any issues or have questions:
+
+1. Check the [API Documentation](http://localhost:8000/docs)
+2. Review the [Postman Collection](backend/Job_Board_API.postman_collection.json)
+3. Check the [Docker Documentation](DOCKER.md)
+4. Open an issue in the repository
+
+## 🎯 Roadmap
+
+- [ ] Frontend React/Vue.js application
+- [ ] Email notifications for applications
+- [ ] Advanced job search with full-text search
+- [ ] Resume parsing and analysis
+- [ ] Interview scheduling system
+- [ ] Analytics dashboard
+- [ ] Multi-language support
+- [ ] Mobile app
+
+---
+
+**Built with ❤️ using FastAPI and modern Python practices** 

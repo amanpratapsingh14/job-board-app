@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: job_board_db_dev
+    environment:
+      POSTGRES_DB: job_board_dev
+      POSTGRES_USER: job_user
+      POSTGRES_PASSWORD: job_password
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - job_board_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U job_user -d job_board_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend (Development)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: job_board_api_dev
+    environment:
+      - DATABASE_URL=postgresql://job_user:job_password@postgres:5432/job_board_dev
+      - SECRET_KEY=dev-secret-key-change-in-production
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+      - UPLOAD_DIR=uploads
+    volumes:
+      - ./backend:/app
+      - uploads_dev_data:/app/uploads
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - job_board_network
+    restart: unless-stopped
+    command: ["sh", "-c", "python init_docker_db.py && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"]
+
+volumes:
+  postgres_dev_data:
+    driver: local
+  uploads_dev_data:
+    driver: local
+
+networks:
+  job_board_network:
+    driver: bridge 
