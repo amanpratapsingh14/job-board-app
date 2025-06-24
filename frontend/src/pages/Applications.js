@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import { applicationsAPI } from '../services/api';
+// import ResumeModal from '../components/ResumeModal';
 
 const Applications = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filterStatus, setFilterStatus] = useState('');
+  // const [resumeUrl, setResumeUrl] = useState(null);
+  // const [showResumeModal, setShowResumeModal] = useState(false);
 
   useEffect(() => {
     fetchApplications();
@@ -17,13 +21,57 @@ const Applications = () => {
       setLoading(true);
       const response = await applicationsAPI.getAll();
       setApplications(response.data);
-    } catch (err) {
-      setError('Failed to fetch applications');
-      console.error('Error fetching applications:', err);
+    } catch (error) {
+      console.error('Error fetching applications:', error);
+      setError('Failed to load applications');
     } finally {
       setLoading(false);
     }
   };
+
+  const handleDownloadResume = async (applicationId, applicantName, jobTitle) => {
+    try {
+      const response = await applicationsAPI.downloadResume(applicationId);
+      if (!response.ok) {
+        throw new Error('Failed to download resume');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `resume_${applicantName}_${jobTitle}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Resume downloaded successfully!');
+    } catch (err) {
+      toast.error('Failed to download resume. Please try again.');
+    }
+  };
+
+  // const handleViewResume = async (applicationId) => {
+  //   try {
+  //     const response = await applicationsAPI.viewResume(applicationId);
+  //     if (!response.ok) {
+  //       throw new Error('Failed to view resume');
+  //     }
+  //     const blob = await response.blob();
+  //     const url = window.URL.createObjectURL(blob);
+  //     setResumeUrl(url);
+  //     setShowResumeModal(true);
+  //   } catch (err) {
+  //     toast.error('Failed to view resume. Please try again.');
+  //   }
+  // };
+
+  // const closeResumeModal = () => {
+  //   setShowResumeModal(false);
+  //   if (resumeUrl) {
+  //     window.URL.revokeObjectURL(resumeUrl);
+  //     setResumeUrl(null);
+  //   }
+  // };
 
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
@@ -123,14 +171,13 @@ const Applications = () => {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      <Link to={`/jobs/${application.job_id}`} className="hover:text-blue-600">
-                        {application.job_title}
+                      <Link to={`/jobs/${application.job.id}`} className="hover:text-blue-600">
+                        {application.job.title}
                       </Link>
                     </h3>
-                    <p className="text-gray-600 font-medium mb-2">{application.company}</p>
                     <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
-                      <span>📍 {application.location}</span>
-                      <span>💰 ${application.salary_range}</span>
+                      <span>📍 {application.job.location}</span>
+                      <span>💰 ${application.job.salary}</span>
                       <span>📅 Applied {new Date(application.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>
@@ -155,21 +202,27 @@ const Applications = () => {
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <div className="flex space-x-4">
                     <Link
-                      to={`/jobs/${application.job_id}`}
+                      to={`/jobs/${application.job.id}`}
                       className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                     >
                       View Job Details
                     </Link>
                     {application.resume_url && (
-                      <a
-                        href={application.resume_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        onClick={() => handleDownloadResume(application.id, application.name, application.job.title)}
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      >
+                        Download Resume
+                      </button>
+                    )}
+                    {/* {application.resume_url && (
+                      <button
+                        onClick={() => handleViewResume(application.id)}
                         className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                       >
                         View Resume
-                      </a>
-                    )}
+                      </button>
+                    )} */}
                   </div>
                   <div className="text-sm text-gray-500">
                     Application ID: #{application.id}
@@ -210,6 +263,14 @@ const Applications = () => {
           </div>
         </div>
       </div>
+
+      {/* {showResumeModal && (
+        <ResumeModal
+          isOpen={showResumeModal}
+          onClose={() => {}}
+          resumeUrl={resumeUrl}
+        />
+      )} */}
     </div>
   );
 };

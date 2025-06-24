@@ -129,8 +129,7 @@ const Home = () => {
                     {job.location}
                   </div>
                   <div className="flex items-center text-sm text-gray-500">
-                    <DollarSign className="h-4 w-4 mr-2" />
-                    {job.salary_range || 'Salary not specified'}
+                    <span>💰 ${job.salary || 'Salary not specified'}</span>
                   </div>
                 </div>
                 

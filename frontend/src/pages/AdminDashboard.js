@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { jobsAPI, applicationsAPI } from '../services/api';
+// import ResumeModal from '../components/ResumeModal';
 
 const AdminDashboard = () => {
   const [jobs, setJobs] = useState([]);
@@ -9,6 +10,8 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
+  // const [resumeUrl, setResumeUrl] = useState(null);
+  // const [showResumeModal, setShowResumeModal] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -21,11 +24,19 @@ const AdminDashboard = () => {
         jobsAPI.getAll(),
         applicationsAPI.getAll()
       ]);
+      
+      console.log('Raw applications response:', applicationsResponse);
+      console.log('Applications data:', applicationsResponse.data);
+      if (applicationsResponse.data.length > 0) {
+        console.log('First application:', applicationsResponse.data[0]);
+        console.log('First application keys:', Object.keys(applicationsResponse.data[0]));
+      }
+      
       setJobs(jobsResponse.data);
       setApplications(applicationsResponse.data);
-    } catch (err) {
-      setError('Failed to fetch dashboard data');
-      console.error('Error fetching dashboard data:', err);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast.error('Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
@@ -41,6 +52,50 @@ const AdminDashboard = () => {
       toast.error('Failed to delete job. Please try again.');
     }
   };
+
+  const handleDownloadResume = async (applicationId, applicantName, jobTitle) => {
+    try {
+      const response = await applicationsAPI.downloadResume(applicationId);
+      if (!response.ok) {
+        throw new Error('Failed to download resume');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `resume_${applicantName}_${jobTitle}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Resume downloaded successfully!');
+    } catch (err) {
+      toast.error('Failed to download resume. Please try again.');
+    }
+  };
+
+  // const handleViewResume = async (applicationId) => {
+  //   try {
+  //     const response = await applicationsAPI.viewResume(applicationId);
+  //     if (!response.ok) {
+  //       throw new Error('Failed to view resume');
+  //     }
+  //     const blob = await response.blob();
+  //     const url = window.URL.createObjectURL(blob);
+  //     setResumeUrl(url);
+  //     setShowResumeModal(true);
+  //   } catch (err) {
+  //     toast.error('Failed to view resume. Please try again.');
+  //   }
+  // };
+
+  // const closeResumeModal = () => {
+  //   setShowResumeModal(false);
+  //   if (resumeUrl) {
+  //     window.URL.revokeObjectURL(resumeUrl);
+  //     setResumeUrl(null);
+  //   }
+  // };
 
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
@@ -213,8 +268,8 @@ const AdminDashboard = () => {
                     {applications.slice(0, 5).map((application) => (
                       <div key={application.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div>
-                          <p className="font-medium text-gray-900">{application.job_title}</p>
-                          <p className="text-sm text-gray-500">{application.applicant_name}</p>
+                          <p className="font-medium text-gray-900">{application.job.title}</p>
+                          <p className="text-sm text-gray-500">{application.name}</p>
                         </div>
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(application.status)}`}>
                           {application.status.replace('_', ' ').toUpperCase()}
@@ -230,8 +285,10 @@ const AdminDashboard = () => {
                     {jobs.slice(0, 5).map((job) => (
                       <div key={job.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div>
-                          <p className="font-medium text-gray-900">{job.title}</p>
-                          <p className="text-sm text-gray-500">{job.company}</p>
+                          <h4 className="text-lg font-semibold text-gray-900">{job.title}</h4>
+                          <p className="text-sm text-gray-500 mt-1">
+                            📍 {job.location} • 💰 ${job.salary} • 📅 {new Date(job.created_at).toLocaleDateString()}
+                          </p>
                         </div>
                         <span className="text-sm text-gray-500">
                           {new Date(job.created_at).toLocaleDateString()}
@@ -260,9 +317,8 @@ const AdminDashboard = () => {
                       <div className="flex items-start justify-between">
                         <div>
                           <h4 className="text-lg font-semibold text-gray-900">{job.title}</h4>
-                          <p className="text-gray-600">{job.company}</p>
                           <p className="text-sm text-gray-500 mt-1">
-                            📍 {job.location} • 💰 ${job.salary_range} • 📅 {new Date(job.created_at).toLocaleDateString()}
+                            📍 {job.location} • 💰 ${job.salary} • 📅 {new Date(job.created_at).toLocaleDateString()}
                           </p>
                         </div>
                         <div className="flex space-x-2">
@@ -298,10 +354,10 @@ const AdminDashboard = () => {
                     <div key={application.id} className="border border-gray-200 rounded-lg p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h4 className="text-lg font-semibold text-gray-900">{application.job_title}</h4>
-                          <p className="text-gray-600">{application.applicant_name}</p>
+                          <h4 className="text-lg font-semibold text-gray-900">{application.job.title}</h4>
+                          <p className="text-gray-600">{application.name}</p>
                           <p className="text-sm text-gray-500 mt-1">
-                            📧 {application.applicant_email} • 📅 {new Date(application.created_at).toLocaleDateString()}
+                            📧 {application.email} • 📅 {new Date(application.created_at).toLocaleDateString()}
                           </p>
                           {application.cover_letter && (
                             <p className="text-gray-700 text-sm mt-2 line-clamp-2">
@@ -327,21 +383,27 @@ const AdminDashboard = () => {
                       </div>
                       <div className="mt-4 flex space-x-2">
                         <Link
-                          to={`/jobs/${application.job_id}`}
+                          to={`/jobs/${application.job.id}`}
                           className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                         >
                           View Job
                         </Link>
                         {application.resume_url && (
-                          <a
-                            href={application.resume_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <button
+                            onClick={() => handleDownloadResume(application.id, application.name, application.job.title)}
+                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          >
+                            Download Resume
+                          </button>
+                        )}
+                        {/* {application.resume_url && (
+                          <button
+                            onClick={() => handleViewResume(application.id)}
                             className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                           >
                             View Resume
-                          </a>
-                        )}
+                          </button>
+                        )} */}
                       </div>
                     </div>
                   ))}
@@ -351,6 +413,13 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
+      {/* {showResumeModal && (
+        <ResumeModal
+          isOpen={showResumeModal}
+          onClose={closeResumeModal}
+          resumeUrl={resumeUrl}
+        />
+      )} */}
     </div>
   );
 };

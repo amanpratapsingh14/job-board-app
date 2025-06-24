@@ -7,7 +7,6 @@ const Jobs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterCategory, setFilterCategory] = useState('');
 
   useEffect(() => {
     fetchJobs();
@@ -28,10 +27,8 @@ const Jobs = () => {
 
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          job.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !filterCategory || job.category === filterCategory;
-    return matchesSearch && matchesCategory;
+    return matchesSearch;
   });
 
   if (loading) {
@@ -72,27 +69,11 @@ const Jobs = () => {
             <div className="flex-1">
               <input
                 type="text"
-                placeholder="Search jobs by title, company, or description..."
+                placeholder="Search jobs by title or description..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-            </div>
-            <div className="sm:w-48">
-              <select
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">All Categories</option>
-                <option value="Technology">Technology</option>
-                <option value="Marketing">Marketing</option>
-                <option value="Sales">Sales</option>
-                <option value="Design">Design</option>
-                <option value="Engineering">Engineering</option>
-                <option value="Healthcare">Healthcare</option>
-                <option value="Education">Education</option>
-              </select>
             </div>
           </div>
         </div>
@@ -114,11 +95,7 @@ const Jobs = () => {
                           {job.title}
                         </Link>
                       </h3>
-                      <p className="text-gray-600 font-medium">{job.company}</p>
                     </div>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {job.category}
-                    </span>
                   </div>
                   
                   <p className="text-gray-600 mb-4 line-clamp-3">
@@ -127,7 +104,7 @@ const Jobs = () => {
                   
                   <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                     <span>📍 {job.location}</span>
-                    <span>💰 ${job.salary_range}</span>
+                    <span>💰 ${job.salary}</span>
                   </div>
                   
                   <div className="flex items-center justify-between">

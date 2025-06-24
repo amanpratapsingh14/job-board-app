@@ -148,7 +148,7 @@ const Dashboard = () => {
                           <p className="text-gray-600 mb-2">{application.company}</p>
                           <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
                             <span>📍 {application.location}</span>
-                            <span>💰 ${application.salary_range}</span>
+                            <span>💰 ${application.job.salary}</span>
                             <span>📅 Applied {new Date(application.created_at).toLocaleDateString()}</span>
                           </div>
                           {application.cover_letter && (
