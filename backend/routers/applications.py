@@ -1,5 +1,7 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import aiofiles
 import os
@@ -60,6 +62,77 @@ def read_application(
         raise HTTPException(status_code=403, detail="Not enough permissions")
     
     return application
+
+@router.get("/{application_id}/resume/download")
+def download_resume(
+    application_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Download resume file for an application"""
+    application = get_application(db, application_id=application_id)
+    if application is None:
+        raise HTTPException(status_code=404, detail="Application not found")
+    # Check if user has permission to download this resume
+    if not current_user.is_admin and application.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    if not application.resume_url:
+        raise HTTPException(status_code=404, detail="Resume not found")
+    # Extract filename from resume_url
+    filename = application.resume_url.split('/')[-1]
+    file_path = os.path.join(settings.UPLOAD_DIR, filename)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Resume file not found")
+    # Get original filename for download
+    original_filename = f"resume_{application.name}_{application.job.title}.pdf"
+    return FileResponse(
+        path=file_path,
+        filename=original_filename,
+        media_type='application/octet-stream',
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET",
+            "Access-Control-Allow-Headers": "*",
+        }
+    )
+
+@router.get("/{application_id}/resume/view")
+def view_resume(
+    application_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """View resume file for an application (opens in browser)"""
+    application = get_application(db, application_id=application_id)
+    if application is None:
+        raise HTTPException(status_code=404, detail="Application not found")
+    # Check if user has permission to view this resume
+    if not current_user.is_admin and application.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    if not application.resume_url:
+        raise HTTPException(status_code=404, detail="Resume not found")
+    # Extract filename from resume_url
+    filename = application.resume_url.split('/')[-1]
+    file_path = os.path.join(settings.UPLOAD_DIR, filename)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Resume file not found")
+    # Determine content type based on file extension
+    file_extension = os.path.splitext(filename)[1].lower()
+    content_type_map = {
+        '.pdf': 'application/pdf',
+        '.doc': 'application/msword',
+        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    }
+    content_type = content_type_map.get(file_extension, 'application/octet-stream')
+    return FileResponse(
+        path=file_path,
+        media_type=content_type,
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET",
+            "Access-Control-Allow-Headers": "*",
+        }
+    )
 
 @router.post("/", response_model=Application)
 async def create_job_application(

@@ -89,6 +89,28 @@ export const applicationsAPI = {
     });
   },
   updateStatus: (id, status) => api.put(`/applications/${id}`, { status }),
+  downloadResume: (applicationId) => {
+    const token = localStorage.getItem('token');
+    const url = `${API_BASE_URL}/applications/${applicationId}/resume/download`;
+    return fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/octet-stream',
+      },
+    });
+  },
+  viewResume: (applicationId) => {
+    const token = localStorage.getItem('token');
+    const url = `${API_BASE_URL}/applications/${applicationId}/resume/view`;
+    return fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      },
+    });
+  },
 };
 
 export default api; 

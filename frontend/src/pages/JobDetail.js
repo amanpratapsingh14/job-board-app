@@ -13,6 +13,8 @@ const JobDetail = () => {
   const [error, setError] = useState(null);
   const [applying, setApplying] = useState(false);
   const [application, setApplication] = useState({
+    name: '',
+    email: '',
     cover_letter: '',
     resume: null
   });
@@ -57,6 +59,22 @@ const JobDetail = () => {
       return;
     }
 
+    // Check if required fields are filled
+    if (!application.name.trim()) {
+      alert('Please enter your name.');
+      return;
+    }
+
+    if (!application.email.trim()) {
+      alert('Please enter your email.');
+      return;
+    }
+
+    if (!application.cover_letter.trim()) {
+      alert('Please enter a cover letter.');
+      return;
+    }
+
     // Check if resume is selected
     if (!application.resume) {
       alert('Please select a resume file.');
@@ -67,18 +85,16 @@ const JobDetail = () => {
       setApplying(true);
       const formData = new FormData();
       formData.append('job_id', id);
-      // Extract name from email (username part before @)
-      const name = user.email ? user.email.split('@')[0] : '';
-      formData.append('name', name);
-      formData.append('email', user.email || '');
+      formData.append('name', application.name);
+      formData.append('email', application.email);
       formData.append('cover_letter', application.cover_letter);
       formData.append('resume', application.resume);
 
       // Debug: Log what we're sending
       console.log('Sending application data:');
       console.log('job_id:', id);
-      console.log('name:', name);
-      console.log('email:', user.email);
+      console.log('name:', application.name);
+      console.log('email:', application.email);
       console.log('cover_letter:', application.cover_letter);
       console.log('resume:', application.resume);
 
@@ -128,16 +144,12 @@ const JobDetail = () => {
           <div className="flex items-start justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{job.title}</h1>
-              <p className="text-xl text-gray-600 mb-4">{job.company}</p>
               <div className="flex items-center space-x-4 text-gray-500">
                 <span>📍 {job.location}</span>
-                <span>💰 ${job.salary_range}</span>
+                <span>💰 ${job.salary}</span>
                 <span>📅 Posted {new Date(job.created_at).toLocaleDateString()}</span>
               </div>
             </div>
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-              {job.category}
-            </span>
           </div>
 
           <div className="border-t border-gray-200 pt-6">
@@ -173,6 +185,40 @@ const JobDetail = () => {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    required
+                    value={application.name}
+                    onChange={handleInputChange}
+                    placeholder="Enter your full name"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    required
+                    value={application.email}
+                    onChange={handleInputChange}
+                    placeholder="Enter your email address"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label htmlFor="cover_letter" className="block text-sm font-medium text-gray-700 mb-2">
                   Cover Letter *
