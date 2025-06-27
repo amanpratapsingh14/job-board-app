@@ -66,6 +66,43 @@ A comprehensive job board application with admin and user interfaces, built with
 - **PostgreSQL** - Production database
 - **Redis** - Caching layer
 
+## 🏗 Architecture Overview (3 minutes)
+
+### Tech Stack Deep Dive
+
+**Frontend Stack:**
+- React 18 with modern hooks and functional components
+- Tailwind CSS for responsive, beautiful UI
+- React Router for seamless navigation
+- JWT authentication with secure token management
+
+**Backend Stack:**
+- FastAPI for high-performance API development
+- SQLAlchemy ORM with PostgreSQL database
+- Pydantic for data validation and serialization
+- bcrypt for secure password hashing
+
+**DevOps & Infrastructure:**
+- Docker containerization for consistent deployment
+- Docker Compose for multi-service orchestration
+- Redis for caching and session management
+- Comprehensive API documentation with Swagger UI
+
+### System Architecture
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   React Frontend│    │   FastAPI Backend│    │   PostgreSQL DB │
+│   (Port 3000)   │◄──►│   (Port 8000)   │◄──►│   (Port 5432)   │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │
+                                ▼
+                       ┌─────────────────┐
+                       │   Redis Cache   │
+                       │   (Port 6379)   │
+                       └─────────────────┘
+```
+
+
 ## 📁 Project Structure
 
 ```
@@ -186,16 +223,39 @@ docker-compose logs -f backend
 
 ### Docker Services
 
-| Service | Port | Description |
-|---------|------|-------------|
-| Backend API | 8000 | FastAPI application |
-| PostgreSQL | 5432 | Database |
-| Redis | 6379 | Caching |
+| Service       | Port  | Description           |
+|---------------|-------|-----------------------|
+| Frontend      | 3000  | React development UI  |
+| Backend API   | 8000  | FastAPI application   |
+| PostgreSQL    | 5432  | Database              |
+| Redis         | 6379  | Caching               |
 
 ### Access Points
+- **Frontend**: http://localhost:3000
 - **API**: http://localhost:8000
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
+
+#### Development Workflow (with Docker Compose)
+
+To start the full development environment (backend, frontend, and database):
+
+```bash
+./docker-setup.sh dev
+```
+
+- The React frontend will be available at http://localhost:3000 and will hot-reload on code changes.
+- The FastAPI backend will be available at http://localhost:8000.
+- The database will be available at port 5432.
+
+#### Stopping and Cleaning Up
+
+To stop all services and clean up resources:
+
+```bash
+./docker-setup.sh stop
+./docker-setup.sh cleanup
+```
 
 For detailed Docker documentation, see [DOCKER.md](DOCKER.md)
 

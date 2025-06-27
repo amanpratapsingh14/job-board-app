@@ -74,12 +74,15 @@ start_dev() {
         exit 1
     fi
     
+    docker-compose -f docker-compose.dev.yml down --volumes --remove-orphans
+    
     docker-compose -f docker-compose.dev.yml up -d
     
     if [ $? -eq 0 ]; then
         echo "✅ Development environment started successfully!"
         echo ""
         echo "🌐 Access your application:"
+        echo "   Web UI: http://localhost:3000"
         echo "   API: http://localhost:8000"
         echo "   Swagger UI: http://localhost:8000/docs"
         echo ""

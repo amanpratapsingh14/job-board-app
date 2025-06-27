@@ -18,17 +18,18 @@ const Layout = ({ children }) => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navigation = [
-    { name: 'Home', href: '/', icon: Home },
-    { name: 'Jobs', href: '/jobs', icon: Briefcase },
-    ...(isAuthenticated ? [
-      { name: 'Dashboard', href: '/dashboard', icon: User },
-      { name: 'Applications', href: '/applications', icon: FileText },
-    ] : []),
-    ...(isAdmin ? [
-      { name: 'Admin', href: '/admin', icon: Settings },
-    ] : []),
-  ];
+  const navigation = isAdmin
+    ? [
+        { name: 'Admin', href: '/admin', icon: Settings },
+      ]
+    : [
+        { name: 'Home', href: '/', icon: Home },
+        { name: 'Jobs', href: '/jobs', icon: Briefcase },
+        ...(isAuthenticated ? [
+          { name: 'Dashboard', href: '/dashboard', icon: User },
+          { name: 'Applications', href: '/applications', icon: FileText },
+        ] : []),
+      ];
 
   const isActive = (path) => location.pathname === path;
 
