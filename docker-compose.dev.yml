@@ -46,6 +46,25 @@ services:
     restart: unless-stopped
     command: ["sh", "-c", "python init_docker_db.py && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"]
 
+  # React Frontend (Development)
+  frontend:
+    image: node:18
+    container_name: job_board_frontend_dev
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    command: ["sh", "-c", "npm install && npm start"]
+    depends_on:
+      - backend
+    networks:
+      - job_board_network
+    restart: unless-stopped
+
 volumes:
   postgres_dev_data:
     driver: local

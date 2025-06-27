@@ -36,43 +36,51 @@ api.interceptors.response.use(
   }
 );
 
+// Helper function to add signal to requests
+const addSignal = (config, signal) => {
+  if (signal) {
+    return { ...config, signal };
+  }
+  return config;
+};
+
 // Auth API
 export const authAPI = {
-  register: (userData) => api.post('/auth/register', userData),
-  login: (credentials) => {
+  register: (userData, signal) => api.post('/auth/register', userData, addSignal({}, signal)),
+  login: (credentials, signal) => {
     const formData = new URLSearchParams();
     formData.append('username', credentials.username);
     formData.append('password', credentials.password);
-    return api.post('/auth/token', formData, {
+    return api.post('/auth/token', formData, addSignal({
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-    });
+    }, signal));
   },
 };
 
 // Jobs API
 export const jobsAPI = {
-  getAll: (params = {}) => api.get('/jobs/', { params }),
-  getById: (id) => api.get(`/jobs/${id}`),
-  create: (jobData) => api.post('/jobs/', jobData),
-  update: (id, jobData) => api.put(`/jobs/${id}`, jobData),
-  delete: (id) => api.delete(`/jobs/${id}`),
+  getAll: (params = {}, signal) => api.get('/jobs/', addSignal({ params }, signal)),
+  getById: (id, signal) => api.get(`/jobs/${id}`, addSignal({}, signal)),
+  create: (jobData, signal) => api.post('/jobs/', jobData, addSignal({}, signal)),
+  update: (id, jobData, signal) => api.put(`/jobs/${id}`, jobData, addSignal({}, signal)),
+  delete: (id, signal) => api.delete(`/jobs/${id}`, addSignal({}, signal)),
 };
 
 // Applications API
 export const applicationsAPI = {
-  getAll: (params = {}) => api.get('/applications/', { params }),
-  getById: (id) => api.get(`/applications/${id}`),
-  getByJob: (jobId) => api.get(`/applications/job/${jobId}`),
-  create: (applicationData) => {
+  getAll: (params = {}, signal) => api.get('/applications/', addSignal({ params }, signal)),
+  getById: (id, signal) => api.get(`/applications/${id}`, addSignal({}, signal)),
+  getByJob: (jobId, signal) => api.get(`/applications/job/${jobId}`, addSignal({}, signal)),
+  create: (applicationData, signal) => {
     // If applicationData is already a FormData object, use it directly
     if (applicationData instanceof FormData) {
-      return api.post('/applications/', applicationData, {
+      return api.post('/applications/', applicationData, addSignal({
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-      });
+      }, signal));
     }
     
     // Otherwise, create FormData from object (for backward compatibility)
@@ -82,14 +90,14 @@ export const applicationsAPI = {
         formData.append(key, applicationData[key]);
       }
     });
-    return api.post('/applications/', formData, {
+    return api.post('/applications/', formData, addSignal({
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-    });
+    }, signal));
   },
-  updateStatus: (id, status) => api.put(`/applications/${id}`, { status }),
-  downloadResume: (applicationId) => {
+  updateStatus: (id, status, signal) => api.put(`/applications/${id}`, { status }, addSignal({}, signal)),
+  downloadResume: (applicationId, signal) => {
     const token = localStorage.getItem('token');
     const url = `${API_BASE_URL}/applications/${applicationId}/resume/download`;
     return fetch(url, {
@@ -98,9 +106,10 @@ export const applicationsAPI = {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/octet-stream',
       },
+      signal,
     });
   },
-  viewResume: (applicationId) => {
+  viewResume: (applicationId, signal) => {
     const token = localStorage.getItem('token');
     const url = `${API_BASE_URL}/applications/${applicationId}/resume/view`;
     return fetch(url, {
@@ -109,6 +118,7 @@ export const applicationsAPI = {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       },
+      signal,
     });
   },
 };
